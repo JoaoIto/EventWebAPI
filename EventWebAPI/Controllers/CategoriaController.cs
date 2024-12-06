@@ -25,7 +25,7 @@ namespace EventWebAPI.Controllers
         /// Retorna todas as categorias.
         /// </summary>
         /// <remarks>
-        /// Este endpoint retorna uma lista de todas as categorias disponíveis no sistema.
+        /// Este endpoint retorna uma lista de todas as categorias disponíveis no sistema. Ideal para obter uma visão geral de todas as categorias cadastradas.
         /// </remarks>
         /// <response code="200">Lista de categorias retornada com sucesso.</response>
         [HttpGet]
@@ -42,13 +42,15 @@ namespace EventWebAPI.Controllers
         /// </summary>
         /// <param name="id">ID da categoria a ser buscada.</param>
         /// <remarks>
-        /// Este endpoint retorna uma categoria específica com base no ID fornecido.
+        /// Este endpoint retorna uma categoria específica com base no ID fornecido. Caso o ID não exista, uma mensagem de erro será retornada.
         /// </remarks>
         /// <response code="200">Categoria encontrada com sucesso.</response>
         /// <response code="404">Categoria não encontrada.</response>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(200, "Categoria encontrada com sucesso.", typeof(Categoria))]
+        [SwaggerResponse(404, "Categoria não encontrada.")]
         public async Task<ActionResult<Categoria>> GetCategoria(int id)
         {
             var categoria = await _context.Categorias.FindAsync(id);
@@ -66,13 +68,15 @@ namespace EventWebAPI.Controllers
         /// </summary>
         /// <param name="categoria">Dados da categoria a ser criada.</param>
         /// <remarks>
-        /// Este endpoint permite criar uma nova categoria no sistema.
+        /// Este endpoint permite criar uma nova categoria no sistema. O nome da categoria será verificado para garantir que não haja duplicidade.
         /// </remarks>
         /// <response code="201">Categoria criada com sucesso.</response>
         /// <response code="400">Erro na validação dos dados fornecidos.</response>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [SwaggerResponse(201, "Categoria criada com sucesso.", typeof(Categoria))]
+        [SwaggerResponse(400, "Erro na validação dos dados fornecidos.")]
         public async Task<ActionResult<Categoria>> CreateCategoria([FromBody] Categoria categoria)
         {
             if (!ModelState.IsValid)
@@ -98,7 +102,7 @@ namespace EventWebAPI.Controllers
         /// <param name="id">ID da categoria a ser atualizada.</param>
         /// <param name="categoria">Novos dados para a categoria.</param>
         /// <remarks>
-        /// Este endpoint atualiza os dados de uma categoria específica com base no ID fornecido.
+        /// Este endpoint atualiza os dados de uma categoria específica com base no ID fornecido. Caso a categoria não seja encontrada, um erro será retornado.
         /// </remarks>
         /// <response code="204">Categoria atualizada com sucesso.</response>
         /// <response code="400">Erro na validação dos dados fornecidos.</response>
@@ -107,6 +111,9 @@ namespace EventWebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(204, "Categoria atualizada com sucesso.")]
+        [SwaggerResponse(400, "Erro na validação dos dados fornecidos.")]
+        [SwaggerResponse(404, "Categoria não encontrada.")]
         public async Task<IActionResult> UpdateCategoria(int id, [FromBody] Categoria categoria)
         {
             if (id != categoria.CategoriaId)
@@ -145,13 +152,15 @@ namespace EventWebAPI.Controllers
         /// </summary>
         /// <param name="id">ID da categoria a ser excluída.</param>
         /// <remarks>
-        /// Este endpoint exclui uma categoria com base no ID fornecido.
+        /// Este endpoint exclui uma categoria com base no ID fornecido. Se a categoria não existir, um erro será retornado.
         /// </remarks>
         /// <response code="204">Categoria excluída com sucesso.</response>
         /// <response code="404">Categoria não encontrada.</response>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [SwaggerResponse(204, "Categoria excluída com sucesso.")]
+        [SwaggerResponse(404, "Categoria não encontrada.")]
         public async Task<IActionResult> DeleteCategoria(int id)
         {
             var categoria = await _context.Categorias.FindAsync(id);
