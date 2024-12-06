@@ -2,6 +2,7 @@ using EventWebAPI.Data;
 using EventWebAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,9 +25,15 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+    c.IncludeXmlComments(xmlPath);
     // Ativar suporte a anotações (como [Display], [Required], etc.)
     c.EnableAnnotations();
 });
+
+
 
 // Configurar o DbContext com banco de dados em memória antes de `builder.Build()`
 builder.Services.AddDbContext<AppDbContext>(options =>
