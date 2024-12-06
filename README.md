@@ -4,6 +4,8 @@ A API **EventWebApp** é uma aplicação desenvolvida para o gerenciamento de ev
 
 A API foi construída com **ASP.NET Core**, é totalmente documentada usando **Swagger**, e permite o consumo de dados através de requisições **REST**.
 
+![image](https://github.com/user-attachments/assets/597df403-8073-4bf2-9cab-a382421c5940)
+
 ## Bibliotecas utilizadas:
 
 **SwaggerBuckle** e **ASP.NET Annotations** são utilizados para melhorar as validações e documentações dos endpoints.
