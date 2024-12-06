@@ -1,8 +1,11 @@
 ﻿using EventWebAPI.Data;
 using EventWebAPI.Models;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace EventWebAPI.Controllers
@@ -21,44 +24,66 @@ namespace EventWebAPI.Controllers
         /// <summary>
         /// Retorna todas as categorias.
         /// </summary>
-        /// <returns>Lista de categorias.</returns>
+        /// <remarks>
+        /// Este endpoint retorna uma lista de todas as categorias disponíveis no sistema.
+        /// </remarks>
+        /// <response code="200">Lista de categorias retornada com sucesso.</response>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [Produces("application/json")]
+        [SwaggerResponse(200, "Lista de Categorias", typeof(IEnumerable<Categoria>))]
         public async Task<ActionResult<IEnumerable<Categoria>>> GetCategorias()
         {
-            return await _context.Categorias.ToListAsync();
+            return Ok(await _context.Categorias.ToListAsync());
         }
 
         /// <summary>
         /// Retorna uma categoria específica pelo ID.
         /// </summary>
-        /// <param name="id">ID da categoria.</param>
-        /// <returns>Categoria específica.</returns>
+        /// <param name="id">ID da categoria a ser buscada.</param>
+        /// <remarks>
+        /// Este endpoint retorna uma categoria específica com base no ID fornecido.
+        /// </remarks>
+        /// <response code="200">Categoria encontrada com sucesso.</response>
+        /// <response code="404">Categoria não encontrada.</response>
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Categoria>> GetCategoria(int id)
         {
             var categoria = await _context.Categorias.FindAsync(id);
 
             if (categoria == null)
             {
-                return NotFound();
+                return NotFound(new { Message = "Categoria não encontrada." });
             }
 
-            return categoria;
+            return Ok(categoria);
         }
 
         /// <summary>
         /// Cria uma nova categoria.
         /// </summary>
-        /// <param name="categoria">Objeto com os dados da categoria.</param>
-        /// <returns>Categoria criada.</returns>
+        /// <param name="categoria">Dados da categoria a ser criada.</param>
+        /// <remarks>
+        /// Este endpoint permite criar uma nova categoria no sistema.
+        /// </remarks>
         /// <response code="201">Categoria criada com sucesso.</response>
-        /// <response code="400">Se os dados fornecidos não forem válidos.</response>
+        /// <response code="400">Erro na validação dos dados fornecidos.</response>
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<Categoria>> CreateCategoria([FromBody] Categoria categoria)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+
+            // Validação extra: verificar se o nome já existe
+            if (_context.Categorias.Any(c => c.Nome == categoria.Nome))
+            {
+                return BadRequest(new { Message = "Categoria com este nome já existe." });
             }
 
             _context.Categorias.Add(categoria);
@@ -71,17 +96,27 @@ namespace EventWebAPI.Controllers
         /// Atualiza uma categoria existente.
         /// </summary>
         /// <param name="id">ID da categoria a ser atualizada.</param>
-        /// <param name="categoria">Objeto com os novos dados da categoria.</param>
-        /// <returns>Resposta da atualização.</returns>
+        /// <param name="categoria">Novos dados para a categoria.</param>
+        /// <remarks>
+        /// Este endpoint atualiza os dados de uma categoria específica com base no ID fornecido.
+        /// </remarks>
         /// <response code="204">Categoria atualizada com sucesso.</response>
-        /// <response code="400">Se os dados não forem válidos ou o ID não coincidir.</response>
-        /// <response code="404">Se a categoria não for encontrada.</response>
+        /// <response code="400">Erro na validação dos dados fornecidos.</response>
+        /// <response code="404">Categoria não encontrada.</response>
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateCategoria(int id, [FromBody] Categoria categoria)
         {
             if (id != categoria.CategoriaId)
             {
-                return BadRequest();
+                return BadRequest(new { Message = "ID fornecido não coincide com o da categoria." });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
             }
 
             _context.Entry(categoria).State = EntityState.Modified;
@@ -94,7 +129,7 @@ namespace EventWebAPI.Controllers
             {
                 if (!CategoriaExists(id))
                 {
-                    return NotFound();
+                    return NotFound(new { Message = "Categoria não encontrada." });
                 }
                 else
                 {
@@ -109,16 +144,20 @@ namespace EventWebAPI.Controllers
         /// Exclui uma categoria específica.
         /// </summary>
         /// <param name="id">ID da categoria a ser excluída.</param>
-        /// <returns>Resposta da exclusão.</returns>
+        /// <remarks>
+        /// Este endpoint exclui uma categoria com base no ID fornecido.
+        /// </remarks>
         /// <response code="204">Categoria excluída com sucesso.</response>
-        /// <response code="404">Se a categoria não for encontrada.</response>
+        /// <response code="404">Categoria não encontrada.</response>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteCategoria(int id)
         {
             var categoria = await _context.Categorias.FindAsync(id);
             if (categoria == null)
             {
-                return NotFound();
+                return NotFound(new { Message = "Categoria não encontrada." });
             }
 
             _context.Categorias.Remove(categoria);

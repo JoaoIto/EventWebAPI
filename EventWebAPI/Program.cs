@@ -1,6 +1,7 @@
 using EventWebAPI.Data;
 using EventWebAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +9,24 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Configuração do Swagger
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "API de Eventos.",
+        Version = "v1",
+        Description = "API para gerenciamento de eventos.",
+        Contact = new OpenApiContact
+        {
+            Name = "João Victor Póvoa França",
+            Email = "joaovictorpfr@gmail.com",
+            Url = new Uri("https://joaoito-blog.vercel.app/")
+        }
+    });
+
+    // Ativar suporte a anotações (como [Display], [Required], etc.)
+    c.EnableAnnotations();
+});
 
 // Configurar o DbContext com banco de dados em memória antes de `builder.Build()`
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -31,6 +49,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    Console.WriteLine("A aplicação foi iniciada com sucesso.");
+});
+
+app.Lifetime.ApplicationStopped.Register(() =>
+{
+    Console.WriteLine("A aplicação foi finalizada.");
+});
+
+
 
 app.UseHttpsRedirection();
 
